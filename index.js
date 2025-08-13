@@ -15,8 +15,15 @@ const uri = process.env.MONGO_URL;
 
 const app = express();
 
-app.use(cors());
+
 app.use(bodyParser.json());
+app.use(cors({
+  origin: "https://zerodhaclone-frontend-4.onrender.com", // replace with actual frontend URL
+  credentials: true, // allow cookies to be sent
+})); 
+
+
+
 
 // app.get("/addHoldings", async (req, res) => {
 //   let tempHoldings = [
