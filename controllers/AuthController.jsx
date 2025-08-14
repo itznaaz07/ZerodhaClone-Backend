@@ -1,4 +1,3 @@
-// AuthController.js
 const User = require("../models/UserModel");
 const { createSecretToken } = require("../util/SecretToken");
 const bcrypt = require("bcryptjs");
@@ -16,12 +15,18 @@ module.exports.Signup = async (req, res, next) => {
       return res.status(409).json({ message: "User already exists" });
     }
 
-    const user = await User.create({ email, password, username, createdAt });
-    const token = createSecretToken(user._id);
+    // ✅ No manual hashing — pre("save") in UserModel handles it
+    const user = await User.create({
+      email,
+      password,
+      username,
+      createdAt,
+    });
 
+    const token = createSecretToken(user._id);
     res.cookie("token", token, {
       withCredentials: true,
-      httpOnly: true, // security improvement
+      httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Strict",
     });
@@ -31,6 +36,7 @@ module.exports.Signup = async (req, res, next) => {
       success: true,
       user: { username: user.username, email: user.email },
     });
+
     next();
   } catch (error) {
     console.error(error);
@@ -57,10 +63,10 @@ module.exports.Login = async (req, res, next) => {
 
     const token = createSecretToken(user._id);
     res.cookie("token", token, {
-      withCredentials: true,
+     
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "Strict",
+      sameSite: "None",
     });
 
     res.status(200).json({
@@ -68,7 +74,7 @@ module.exports.Login = async (req, res, next) => {
       success: true,
       user: { username: user.username, email: user.email },
     });
-    next();
+    
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
