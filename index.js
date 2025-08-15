@@ -4,8 +4,10 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const authRoutes = require("./routes/AuthRoutes"); // adjust path if needed
 
 const { HoldingsModel } = require("./models/HoldingsModels");
+const cookieParser = require("cookie-parser");
 
 const { PositionsModel } = require("./models/PositionsModel");
 const { OrdersModel } = require("./models/OrdersModel");
@@ -13,10 +15,26 @@ const { OrdersModel } = require("./models/OrdersModel");
 const PORT = process.env.PORT || 3002;
 const uri = process.env.MONGO_URL;
 
-const app = express();
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://zerodhafront-n3t6.onrender.com",
+];
 
-app.use(cors());
+app.use(cors({
+  origin: function(origin, callback){
+    if(!origin) return callback(null, true); // allow non-browser requests like Postman
+    if(allowedOrigins.indexOf(origin) === -1){
+      let msg = 'CORS policy does not allow this origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true
+}));
+const app = express();
 app.use(bodyParser.json());
+app.use(cookieParser());
+app.use("/api", authRoutes); 
 
 // app.get("/addHoldings", async (req, res) => {
 //   let tempHoldings = [
